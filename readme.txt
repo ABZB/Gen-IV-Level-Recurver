@@ -1,40 +1,44 @@
-TRdata, start from 0x1758
+Section I: Purpose
 
-block 1 (0x1 for moves, 0x02 for items)
+	This program increases the level curve of enemy trainers.
 
-read block 4 (number of Pokemon)
+	It currently works for the following games:
+
+	HeartGold
+	Soulsilver
+
+	I plan to extend its functionality to at least Black2/White2.
+
+	I do not plan to extend it to work with games from Generation VI onward, as tools to do so for those games already exist.
+
+Section II: Description of edits
+
+	HGSS:
+
+	* Level curve rescaled so the Elite 4 is roughly at the level it is in Generation I games, and Kanto trainers scale from there through level 100 (Kanto Gym Leaders will be leveled in the 90s).
+
+	* All trainer's Pokemon that are level 40 or higher are evolved to their final form (Pokemon with multiple evolutionary branches will evolve into the one with the lowest Pokedex number).
 
 
-write array with # trainers lines, each having [# Pokemon, bool items, bool attacks]
+Section III: Instructions
 
-let skip_arr =[]
+	1) Decompress the NDS file using an appropriate tool.
 
-then, for each line in trainer_array:
+	2) Run Trainer Level Booster
 
-temp_skip = (6 + 2)
+	3) Select the appropriate generation, if this feature has been added.
 
-if items, temp+skip += 2
-if moves, temp_kip += 8
+	4) Select the appropriate files as instructed:
 
-do this # Pokemon times
-	skip_arr.append(3*(temp_skip)
+			* HGSS: root/a/0/5/5 (TRdata) then root/a/0/5/6 (TRpoke)
 
-
-	position = 2 (after the first level digit
+	5) A timestamped backup of the file that will be edited will be saved to the /backup subfolder.
 	
-For thing in skip_arr
-	temp_data = int(data[pos])
-
-	if temp_data > 50, temp_data = round(min(100, max(temp_data *1.3, temp_data + 10))
-	else
-	temp_data = temp_data *1.2
+	6) A prompt will appear to save the edited file.
 	
-	data[pos] = temp_data
+	7) Rebuild the NDS file.
 	
-offset initial for trpoke = 174E
+Section IV: Be aware of the following:
 
-first level at 0x174E
-
-Offset by 8 blocks which is 16 hex digits + 8 spaces
-
-Block
+	1) If your trdata or trpoke were edited in a way that changes the offset of the first trainer or Pokemon, the program will (probably) run, but the output will not be good. As this program does not alter any offsets, try running this before applying any other patches, if possible.
+	2) I have not as of yet playtested this, please let me know if there are any trainers or areas where the level jump more or less than they should.
