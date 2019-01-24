@@ -3,6 +3,7 @@ import string
 import math
 from tkinter import *
 from tkinter.filedialog import askopenfilename
+from tkinter.filedialog import asksaveasfilename
 import binascii
 import os
 import time
@@ -139,7 +140,7 @@ def calc(trdata, trpoke):
 #takes in bytearray, saves bytes to file
 def save_binary_file(data, file_name, path):
 	
-	output_path = asksaveasfilename(initialdir = path,  defaultextension = ".txt", initialfile = file_name)
+	output_path = asksaveasfilename(initialdir = path,  defaultextension = "", initialfile = file_name)
 	
 	output_binary = bytes(data)
 	
@@ -151,7 +152,7 @@ def save_binary_file(data, file_name, path):
 def save_backup(data, name):
 	try:
 		current_directory = os.getcsd()
-		file_name = os.path.join(current_directory, 'backup', name, '.',time.strftime("%y/%m/%d %H:%M"),.bak)
+		file_name = os.path.join(current_directory, 'backup', name, '.',time.strftime("%y/%m/%d %H:%M"),'.bak')
 		with open(file_name, 'wb') as f:
 			f.write(output_binary)
 	except:
@@ -193,7 +194,7 @@ def main():
 	#get the data files and the output path
 	trdata, trpoke, output_path = get_files()
 	
-	trpoke = calc()
+	trpoke = calc(trdata, trpoke)
 	
 	#seperates the file name (always a single character from HGSS on) from path
 	file_name = output_path[-1]
