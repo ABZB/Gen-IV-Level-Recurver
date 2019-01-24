@@ -41,4 +41,8 @@ Section III: Instructions
 Section IV: Be aware of the following:
 
 	1) If your trdata or trpoke were edited in a way that changes the offset of the first trainer or Pokemon, the program will (probably) run, but the output will not be good. As this program does not alter any offsets, try running this before applying any other patches, if possible.
+<<<<<<< HEAD
 	2) I have not as of yet playtested this, please let me know if there are any trainers or areas where the level jump more or less than they should.
+=======
+	2) I have not as of yet playtested this, please let me know if there are any trainers or areas where the level jump more or less than they should.
+>>>>>>> 7dfad76f8f5866cf5994c2fdbb011d9aab7517d8

@@ -148,7 +148,7 @@ def save_binary_file(data, file_name, path):
 		f.write(output_binary)
 
 		
-		#write backup of the file to be modified to local directory
+#write backup of the file to be modified to local directory
 def save_backup(data, name):
 	try:
 		current_directory = os.getcsd()
