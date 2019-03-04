@@ -33,7 +33,8 @@ def calc(trdata, trpoke):
 	#TRdata, start from 0x1758 = 5976
 	pointer_data = 5976
 	trainer_number = 0
-	trainer_number_array = [0]
+	#will have bump at the trainer number location
+	trainer_bump = []
 	
 	
 	#parse trdata
@@ -56,18 +57,18 @@ def calc(trdata, trpoke):
 		
 		#write as many skips as the trainer has Pokemon
 		pokemon_count = 0
-		trainer_number_array.append(number_pokemon)
 		while True:
 			#fix for Bugsy (third Pokemon has an extra byte for some reason)
 			#if((trainer_number == 20 and pokemon_count == 2) or (trainer_number == 31 and pokemon_count == 2) or (trainer_number == 32 and pokemon_count == 2) or (trainer_number == 159 and pokemon_count == 0) or (trainer_number == 160 and pokemon_count == 0)):
 				#skip_number += 2
 				#print("fix")
-			#the last slot in the below is for the "increase number" to bump up while retaining the scaling
-			trainer_array.append([trainer_number, skip_number, 0])
+			trainer_array.append([trainer_number, skip_number])
 			pokemon_count += 1
 			if(pokemon_count == number_pokemon):
 				break
-	
+		
+		trainer_bump.append(0)
+		
 		trainer_number += 1
 		pointer_data += 20
 		
@@ -80,9 +81,10 @@ def calc(trdata, trpoke):
 	pokemon_count = 0
 	total_pokemon = len(trainer_array)
 	
+	edit_array = []
+	
+	#pull all the levels:
 	while True:
-
-
 		
 		level = trpoke[pointer_poke]
 		
@@ -108,7 +110,27 @@ def calc(trdata, trpoke):
 			else:
 				print("Both make sense, check manually", level1, level2, "error value", level, "at trainer", 1+trainer_array[pokemon_count][0], "address", pointer_poke)
 				level = min(level1, level2)
-				
+		
+		#level at address pokemon_count
+		edit_array.append([level, pointer_poke])
+		
+		
+		#if this is the last Pokemon, break
+		if(pokemon_count + 1 >= total_pokemon):
+			break
+		else:
+			#move to the next pokemon
+			pointer_poke += trainer_array[pokemon_count][1]
+			#increment the pokemon count
+			pokemon_count += 1
+	
+	
+	
+	#initial scaling of all Pokemon
+	pokemon_count = 0
+	while True:
+	
+		level = edit_array[pokemon_count][0]
 		
 		#scales level, taking into account the order in which that trainer is encountered in-game. 
 		try:
@@ -121,17 +143,13 @@ def calc(trdata, trpoke):
 			if(new_level == level):
 				new_level += 1
 			
-			#adds bump factor for the trainer
-			new_level += trainer_array[pokemon_count][2]
-			
 			#ensures that the level is at least the minimum level
 			while True:
-				if(new_level < trainer_min_level_array_hgss[trainer_array[pokemon_count][0]]):
-					new_level += 1
-					trainer_array[pokemon_count][2] += 1
+				if(new_level + trainer_bump[trainer_array[pokemon_count][0]] < trainer_min_level_array_hgss[trainer_array[pokemon_count][0]]):
+					trainer_bump[trainer_array[pokemon_count][0]] += 1
 				else:
 					break
-			print("Trainer number", trainer_array[pokemon_count][0], "Bumped by", trainer_array[pokemon_count][2])
+			#print("Trainer number", trainer_array[pokemon_count][0], "Bumped by", trainer_bump[trainer_array[pokemon_count][0]])
 				
 			level = min(new_level, 100)
 			
@@ -139,11 +157,25 @@ def calc(trdata, trpoke):
 			print("exception")
 			level = 100
 		
+		edit_array[pokemon_count][0] = level
 		
-
-		#write level back to the byte
-		trpoke[pointer_poke] = level
+		#if this is the last Pokemon, break
+		if(pokemon_count + 1 >= total_pokemon):
+			break
+		else:
+			#increment the pokemon count
+			pokemon_count += 1
 		
+		
+		
+	#add to each trainer to satisfy min level, evolve if needed, then write back to array
+	pokemon_count = 0
+	while True:
+	
+		pointer_poke = edit_array[pokemon_count][1]
+		level = min(edit_array[pokemon_count][0] + trainer_bump[trainer_array[pokemon_count][0]], 100)
+		
+		print(trainer_array[pokemon_count][0], trainer_bump[trainer_array[pokemon_count][0]], level)
 		
 		#evolve the Pokemon if it is above the level it evolves at (or set value for other kinds of evolutions)
 		
@@ -158,8 +190,12 @@ def calc(trdata, trpoke):
 		#get the level that Pokemon should be evolved above. recurse in case a non-evolved pokemon is high enough to evolve twice
 		while True:
 			#get the level this Pokemon should evolve by
-			evolve_level = evolve_level_barrier_array_hgss[new_number]
-			
+			try:
+				evolve_level = evolve_level_barrier_array_hgss[new_number]
+			except:
+				print("Error at", trainer_array[pokemon_count][0] + 1)
+				break
+				
 			#if it's high enough, grab the index number of the next stage
 			if(level >= evolve_level):
 				new_number = evolve_array_hgss[new_number]
@@ -179,15 +215,14 @@ def calc(trdata, trpoke):
 				trpoke[pointer_poke + 3] = 0
 			#low digit
 			trpoke[pointer_poke + 2] = new_number
-						
-			
+					
+
+		#write level back to the byte
+		trpoke[pointer_poke] = level
 		#if this is the last Pokemon, break
 		if(pokemon_count + 1 >= total_pokemon):
 			break
-		
 		else:
-			#move to the next pokemon
-			pointer_poke += trainer_array[pokemon_count][1]
 			#increment the pokemon count
 			pokemon_count += 1
 	return(trpoke)
