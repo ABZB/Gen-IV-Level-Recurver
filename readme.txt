@@ -1,3 +1,6 @@
+Deprecated, folded into Level Recurver, which also works for Gen III games
+
+
 Section I: Purpose
 
 	This program increases the level curve of enemy trainers.
